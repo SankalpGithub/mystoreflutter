@@ -1,6 +1,5 @@
-
 import 'dart:io';
-
+import 'package:http/http.dart' as http;
 import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -10,6 +9,8 @@ import 'package:carousel_slider/carousel_slider.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:percent_indicator/percent_indicator.dart';
+
+import '../models/connectivity.dart';
 
 
 class download extends StatefulWidget{
@@ -39,6 +40,36 @@ class _downloadState extends State<download> {
   double percent = 0.0;
   bool isLoading = false;
   bool isClicked = false;
+bool _isOnline = false;
+
+
+  Future CheckUserConnection() async {
+    try {
+      final response = await http.get(Uri.parse("https://www.google.com"));
+      if (response.statusCode == 200) {
+        setState(() {
+          _isOnline = true;
+        });
+      }else{
+        setState(() {
+          _isOnline = false;
+        });
+      }
+    }catch (e) {
+      setState(() {
+        _isOnline = false;
+      });
+    }
+    if(_isOnline == true){
+      _downloadFile(app_apk_url, app_name);
+    }else if (_isOnline == false){
+      Navigator.pushReplacement(context,
+          MaterialPageRoute(builder:
+              (context) => connectivity(),
+          ));
+    }
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -121,7 +152,7 @@ class _downloadState extends State<download> {
             Center(
               child: GestureDetector(
                 onTap: (){
-                  _downloadFile(app_apk_url, app_name);
+                  CheckUserConnection();
                 },
                 child: Container(
                   margin: EdgeInsets.only(top: 49),

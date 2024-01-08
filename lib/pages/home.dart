@@ -1,33 +1,34 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:mystore/models/colors.dart';
+import 'package:mystore/models/request.dart';
 import 'package:mystore/pages/download.dart';
 import 'package:shimmer/shimmer.dart';
 
 
 class Home extends StatefulWidget {
-  final List? app_list;
-  Home({
-  super.key,
-  required this.app_list,});
   @override
-  State<Home> createState() => myhomepage(app_list: app_list);
+  State<Home> createState() => myhomepage();
 }
 
 class myhomepage extends State<Home> {
-  final List? app_list;
-  myhomepage({
-    required this.app_list,
-  });
-  List? search_app_list;
+  request re = new request();
   bool connction = false;
+  List<dynamic> search_app_list = [];
+  List<dynamic> app_list = [];
   @override
   void initState(){
     super.initState();
-    search_app_list = app_list;
+    data();
   }
 
-
+  void data() async{
+    app_list = await re.fetchData();
+    print(app_list);
+    setState(() {
+      search_app_list = app_list;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -36,7 +37,7 @@ class myhomepage extends State<Home> {
         body: Column(
           children: [
             downAppbar(),
-       Expanded(child: main_body(app_list: search_app_list!)),
+       Expanded(child: main_body(app_list: search_app_list)),
           ],
         )
 
@@ -56,7 +57,6 @@ class myhomepage extends State<Home> {
       ),
     );
   }
-
   Container downAppbar() {
     return Container(
       width: MediaQuery.of(context).size.width * 1,
@@ -101,13 +101,13 @@ class myhomepage extends State<Home> {
   }
 
   runFilter(String keywords) {
-    List? result = [];
+    List<dynamic> result = [];
     if (keywords.isEmpty) {
       result = app_list;
     } else {
-      for(int i = 0;i < (app_list!.length) ;i++){
-        if(app_list![i]['app_name'].toLowerCase().contains(keywords.toLowerCase())){
-          result.add(app_list![i]);
+      for(int i = 0;i < (app_list.length) ;i++){
+        if(app_list[i]['app_name'].toLowerCase().contains(keywords.toLowerCase())){
+          result.add(app_list[i]);
         }
       }
     }
@@ -123,11 +123,11 @@ class main_body extends StatelessWidget {
     required this.app_list,
   });
 
-  final List? app_list;
+  final List<dynamic> app_list;
 
   @override
   Widget build(BuildContext context) {
-    if(app_list != null){
+    if(app_list.length >0){
     return Container(
      margin: EdgeInsets.only(top: 30, left: 20, right: 20),
      height: MediaQuery
@@ -143,9 +143,9 @@ class main_body extends StatelessWidget {
        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
          crossAxisCount: 3,
        ),
-       itemCount: app_list!.length,
+       itemCount: app_list.length,
        itemBuilder: (context, index) {
-         final app = app_list![index];
+         final app = app_list[index];
          return GestureDetector(
            onTap: () {
              Navigator.push(

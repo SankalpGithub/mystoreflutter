@@ -2,9 +2,10 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:mystore/models/colors.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:mystore/models/connectivity.dart';
 import 'package:shimmer/shimmer.dart';
-import '../request.dart';
 import 'home.dart';
+import 'package:http/http.dart' as http;
 
 
 class splash extends StatefulWidget{
@@ -13,28 +14,42 @@ class splash extends StatefulWidget{
 }
 
 class _splashState extends State<splash> {
-
-  request re = new request();
-  var app_list;
+  bool _isOnline = false;
   @override
   void initState() {
     super.initState();
-    data();
-    //Start timer to navigate to home page
-    Timer(Duration(seconds: 3), () {
+    CheckUserConnection();
+  }
+  Future CheckUserConnection() async {
+      try {
+        final response = await http.get(Uri.parse("https://www.google.com"));
+        if (response.statusCode == 200) {
+          setState(() {
+            _isOnline = true;
+          });
+        }else{
+          setState(() {
+            _isOnline = false;
+          });
+        }
+      }catch (e) {
+        setState(() {
+          _isOnline = false;
+        });
+      }
+    if(_isOnline == true){
       Navigator.pushReplacement(context,
           MaterialPageRoute(builder:
-              (context) => Home(app_list: app_list),
-      ));
+              (context) => Home(),
+          ));
+    }else if (_isOnline == false){
+      Navigator.pushReplacement(context,
+          MaterialPageRoute(builder:
+              (context) => connectivity(),
+          ));
     }
-    );
   }
 
-  void data() async{
-    app_list = await re.fetchData();
-    print(app_list);
-    setState(() {});
-  }
 
   @override
   Widget build(BuildContext context) {
